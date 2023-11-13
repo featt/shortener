@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Сокращение ссылок</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.15/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="p-8">
+    <h1 class="text-3xl font-bold mb-4">Сократить ссылку</h1>
+
+    <form id="shorten-form">
+      <input
+        type="text"
+        id="urlInput"
+        placeholder="Вставьте URL здесь"
+        class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500"
+      />
+      <button
+        id="btn"
+        type="button"
+        class="mt-2 py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+      >
+        Сократить
+      </button>
+    </form>
+
+    <div id="shortened-link" class="hidden">
+      <p class="mb-2 font-semibold">Сокращенная ссылка:</p>
+      <a id="shortedUrl" href="#" target="_blank" class="text-blue-500"></a>
+    </div>
+
+    <div id="error-message" class="text-red-500 mt-2 hidden"></div>
+
+    <script>
+      document
+        .getElementById("btn")
+        .addEventListener("click", async function () {
+          const url = document.getElementById("urlInput").value;
+          const errorMessage = document.getElementById("error-message");
+
+          try {
+            const response = await fetch("/short", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ url }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const shortenedLink = document.getElementById("shortedUrl");
+              shortenedLink.classList.remove("hidden");
+              shortenedLink.textContent = data.shortUrl;
+              shortenedLink.href = data.shortUrl;
+              document
+                .getElementById("shortened-link")
+                .classList.remove("hidden");
+              errorMessage.classList.add("hidden");
+            } else {
+              errorMessage.textContent = "Ошибка при сокращении ссылки";
+              errorMessage.classList.remove("hidden");
+            }
+          } catch (error) {
+            errorMessage.textContent = "Произошла ошибка: " + error.message;
+            errorMessage.classList.remove("hidden");
+          }
+        });
+    </script>
+  </body>
+</html>
